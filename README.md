@@ -6,10 +6,15 @@
 ![Python](https://img.shields.io/badge/Python-3.11-blue?style=for-the-badge)
 ![Flask](https://img.shields.io/badge/Flask-3.0-white?style=for-the-badge)
 ![Hackathon](https://img.shields.io/badge/AI_Agent_Olympics-2026-7B61FF?style=for-the-badge)
+![Live](https://img.shields.io/badge/Live_at-tryvela.io-4DFFC3?style=for-the-badge)
 
 ---
 
-## 🚀 What is Vela?
+## 🌐 Live Demo
+
+**[tryvela.io](http://tryvela.io)** — Live on Vultr, deployed tonight
+
+> Built by an FA student from Lahore, Pakistan with zero CS degree — in one Saturday night at the AI Agent Olympics Hackathon 2026.
 
 AI agencies are growing fast — but they have no proper infrastructure to manage the agents they deploy for clients.
 
@@ -194,7 +199,9 @@ Built at the **AI Agent Olympics Hackathon 2026** — Milan AI Week.
 
 **Orrin Agency** — We build AI agents for businesses.
 - Website: [orrin.agency](https://orrin.agency)
-- Instagram: [@orrin.ai](https://instagram.com/orrin.ai)
+- Instagram: [@orrin.agency](https://instagram.com/orrin.agency)
+- Vela: [tryvela.io](http://tryvela.io)
+- Vela Instagram: [@app.vela](https://instagram.com/app.vela)
 
 ---
 
