@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+{% block title %}{{ client.name }}{% endblock %}
+{% block page_title %}{{ client.name }}{% endblock %}
+{% block topbar_actions %}
+  <a href="/clients/{{ client.id }}/report" class="btn-secondary">⚡ Generate Report</a>
+  <a href="/clients/{{ client.id }}/agents/add" class="btn-primary">+ Add Agent</a>
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/clients">Clients</a>
+  <span>/</span>
+  <span>{{ client.name }}</span>
+</div>
+
+<div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:28px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">
+  <div style="width:52px;height:52px;background:rgba(77,255,195,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);">
+    {{ client.name[0].upper() }}
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:24px;">
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Business Type</div>
+      <div style="font-size:14px;">{{ client.business_type or '—' }}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Email</div>
+      <div style="font-size:14px;">{{ client.email or '—' }}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Phone</div>
+      <div style="font-size:14px;">{{ client.phone or '—' }}</div>
+    </div>
+    <div>
+      <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;">Since</div>
+      <div style="font-size:14px;">{{ client.created_at.strftime('%b %d, %Y') }}</div>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-title">
+    Deployed Agents
+    <a href="/clients/{{ client.id }}/agents/add" style="font-size:12px;color:var(--accent);text-decoration:none;">+ Add Agent</a>
+  </div>
+
+  {% if client.agents %}
+  <div class="table-wrap">
+    <div class="table-header" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;">
+      <span>Agent</span><span>Type</span><span>Platform</span><span>Events</span><span>Status</span><span>Actions</span>
+    </div>
+    {% for agent in client.agents %}
+    <div class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr 1fr auto;" id="agent-row-{{ agent.id }}">
+      <div>
+        <div style="font-size:14px;">{{ agent.name }}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px;">{{ agent.description[:50] + '...' if agent.description and agent.description|length > 50 else agent.description or 'No description' }}</div>
+      </div>
+      <div style="color:var(--muted);font-size:13px;text-transform:capitalize;">{{ agent.agent_type or '—' }}</div>
+      <div style="color:var(--muted);font-size:13px;">{{ agent.platform or '—' }}</div>
+      <div style="font-size:13px;" id="event-count-{{ agent.id }}">{{ agent.logs|length }}</div>
+      <div><span class="badge {{ agent.status }}" id="status-badge-{{ agent.id }}">{{ agent.status }}</span></div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="toggleStatus({{ agent.id }})" id="toggle-btn-{{ agent.id }}"
+          style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">
+          {% if agent.status == 'active' %}⏸ Pause{% else %}▶ Activate{% endif %}
+        </button>
+        <button onclick="testWebhook({{ agent.id }})" id="test-btn-{{ agent.id }}"
+          style="background:rgba(77,255,195,0.08);border:1px solid rgba(77,255,195,0.2);color:var(--accent);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">
+          ⚡ Test
+        </button>
+      </div>
+    </div>
+    <div style="background:rgba(0,0,0,0.2);padding:16px 20px;border-bottom:1px solid var(--border);" id="log-feed-{{ agent.id }}">
+      <div style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Recent Activity</div>
+      {% for log in agent.logs[-5:]|reverse %}
+      <div class="log-item">
+        <div class="log-dot {{ log.outcome }}"></div>
+        <div class="log-content">
+          <div class="log-summary">{{ log.summary or 'Event recorded' }}</div>
+          <div class="log-meta" style="display:flex;gap:8px;align-items:center;margin-top:3px;">
+            <span class="log-type">{{ log.event_type }}</span>
+            <span>{{ log.created_at.strftime('%b %d, %H:%M') }}</span>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  <div style="margin-top:20px;padding:16px;background:rgba(77,255,195,0.04);border:1px solid rgba(77,255,195,0.1);border-radius:10px;">
+    <div style="font-size:11px;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">📡 Webhook Endpoints</div>
+    {% for agent in client.agents %}
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(77,255,195,0.05);">
+      <span style="font-size:12px;color:var(--muted);">{{ agent.name }}</span>
+      <code style="font-size:11px;color:var(--accent);background:rgba(77,255,195,0.05);padding:3px 10px;border-radius:4px;">POST /webhook/{{ agent.id }}</code>
+    </div>
+    {% endfor %}
+    <p style="font-size:11px;color:var(--muted);margin-top:10px;">Connect n8n, Vapi, Voiceflow or any platform via these webhook URLs</p>
+  </div>
+
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">🤖</div>
+    <h3>No agents deployed</h3>
+    <p>Add the first AI agent for {{ client.name }}.</p>
+    <a href="/clients/{{ client.id }}/agents/add" class="btn-primary" style="margin-top:20px;display:inline-flex;">+ Deploy Agent</a>
+  </div>
+  {% endif %}
+</div>
+
+<div id="toast" style="position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 20px;font-size:13px;display:none;z-index:999;max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,0.4);">
+  <div id="toast-content" style="display:flex;align-items:center;gap:10px;"></div>
+</div>
+
+<script>
+function showToast(message, type) {
+  const toast = document.getElementById('toast');
+  const content = document.getElementById('toast-content');
+  const color = type === 'success' ? '#4DFFC3' : '#FF4D6D';
+  const icon = type === 'success' ? '✓' : '✕';
+  content.innerHTML = '<span style="color:'+color+';font-size:16px;">'+icon+'</span><span>'+message+'</span>';
+  toast.style.display = 'block';
+  toast.style.borderColor = color + '33';
+  setTimeout(() => toast.style.display = 'none', 3000);
+}
+
+function toggleStatus(agentId) {
+  const btn = document.getElementById('toggle-btn-' + agentId);
+  const badge = document.getElementById('status-badge-' + agentId);
+  btn.textContent = '...';
+  btn.disabled = true;
+  fetch('/agents/' + agentId + '/toggle', {method:'POST'})
+    .then(r => r.json())
+    .then(data => {
+      const status = data.status;
+      badge.className = 'badge ' + status;
+      badge.textContent = status;
+      btn.textContent = status === 'active' ? '⏸ Pause' : '▶ Activate';
+      btn.disabled = false;
+      showToast('Agent ' + status, 'success');
+    });
+}
+
+function testWebhook(agentId) {
+  const btn = document.getElementById('test-btn-' + agentId);
+  const countEl = document.getElementById('event-count-' + agentId);
+  const feed = document.getElementById('log-feed-' + agentId);
+  btn.textContent = '⏳ Sending...';
+  btn.disabled = true;
+  fetch('/agents/' + agentId + '/test-webhook', {method:'POST'})
+    .then(r => r.json())
+    .then(data => {
+      const current = parseInt(countEl.textContent) || 0;
+      countEl.textContent = current + 1;
+      const now = new Date();
+      const timeStr = now.toLocaleDateString('en-US',{month:'short',day:'2-digit'}) + ', ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+      const dotColor = data.outcome === 'success' ? 'var(--accent)' : 'var(--danger)';
+      const newLog = '<div class="log-item" style="animation:fadeUp 0.3s ease both;"><div class="log-dot '+data.outcome+'" style="background:'+dotColor+';box-shadow:0 0 6px '+dotColor+';"></div><div class="log-content"><div class="log-summary">'+data.summary+'</div><div class="log-meta" style="display:flex;gap:8px;align-items:center;margin-top:3px;"><span class="log-type">'+data.event_type+'</span><span>'+timeStr+'</span></div></div></div>';
+      feed.querySelector('div').insertAdjacentHTML('afterend', newLog);
+      btn.textContent = '⚡ Test';
+      btn.disabled = false;
+      showToast('Event received: ' + data.event_type, 'success');
+    });
+}
+</script>
+{% endblock %}

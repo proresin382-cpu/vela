@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Clients{% endblock %}
+{% block page_title %}Clients{% endblock %}
+{% block topbar_actions %}
+  <a href="/clients/add" class="btn-primary">+ Add Client</a>
+{% endblock %}
+
+{% block content %}
+{% if clients %}
+<div class="table-wrap">
+  <div class="table-header" style="grid-template-columns:2fr 1fr 1fr 1fr auto;">
+    <span>Client</span>
+    <span>Business Type</span>
+    <span>Agents</span>
+    <span>Added</span>
+    <span></span>
+  </div>
+  {% for client in clients %}
+  <a href="/clients/{{ client.id }}" class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr auto;">
+    <div>
+      <div style="font-size:14px;">{{ client.name }}</div>
+      <div style="font-size:11px;color:var(--muted);">{{ client.email or '—' }}</div>
+    </div>
+    <div style="color:var(--muted);font-size:13px;">{{ client.business_type or '—' }}</div>
+    <div style="font-size:13px;">{{ client.agents|length }}</div>
+    <div style="color:var(--muted);font-size:12px;">{{ client.created_at.strftime('%b %d') }}</div>
+    <div style="color:var(--accent);font-size:13px;">→</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card">
+  <div class="empty">
+    <div class="empty-icon">👥</div>
+    <h3>No clients yet</h3>
+    <p>Add your first client and start deploying agents for them.</p>
+    <a href="/clients/add" class="btn-primary" style="margin-top:20px;display:inline-flex;">+ Add First Client</a>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

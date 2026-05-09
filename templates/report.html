@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Report — {{ client.name }}{% endblock %}
+{% block page_title %}AI Report{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/clients">Clients</a>
+  <span>/</span>
+  <a href="/clients/{{ client.id }}">{{ client.name }}</a>
+  <span>/</span>
+  <span>Report</span>
+</div>
+
+<div style="display:grid;grid-template-columns:1fr 360px;gap:24px;align-items:start;">
+
+  <!-- Report output -->
+  <div class="card">
+    <div class="card-title">
+      Performance Report — {{ client.name }}
+      {% if report %}
+      <div style="display:flex;gap:8px;">
+        <button onclick="copyReport()" class="btn-secondary" style="font-size:12px;padding:6px 14px;">📋 Copy</button>
+        <button onclick="window.print()" class="btn-secondary" style="font-size:12px;padding:6px 14px;">🖨️ Print</button>
+      </div>
+      {% endif %}
+    </div>
+
+    {% if report %}
+    <div id="report-content" style="font-size:14px;line-height:1.9;color:var(--text);">{{ report | markdown | safe }}</div>
+    {% else %}
+    <div class="empty">
+      <div class="empty-icon">⚡</div>
+      <h3>Ready to generate</h3>
+      <p>Fill in your OpenAI API key and click generate to create a professional client report powered by AI.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Generate form -->
+  <div style="position:sticky;top:80px;">
+    <div class="card">
+      <div class="card-title">Generate Report</div>
+      <form method="POST" class="form-grid">
+        <div class="field">
+          <label>OpenAI API Key</label>
+          <input type="password" name="api_key" placeholder="sk-...">
+          <p style="font-size:11px;color:var(--muted);margin-top:6px;">Or set OPENAI_API_KEY env variable.</p>
+        </div>
+
+        <div style="padding:14px;background:var(--surface2);border-radius:10px;border:1px solid var(--border);">
+          <div style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:10px;">Report will include</div>
+          {% for item in ['Executive Summary', 'Agent Performance', 'Key Metrics', 'Issues & Alerts', 'Recommendations'] %}
+          <div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:12px;color:var(--muted);">
+            <span style="color:var(--accent);">✓</span> {{ item }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <div style="padding:14px;background:rgba(77,255,195,0.04);border:1px solid rgba(77,255,195,0.1);border-radius:10px;">
+          <div style="font-size:11px;color:var(--accent);margin-bottom:6px;">Data included</div>
+          <div style="font-size:12px;color:var(--muted);">{{ client.agents|length }} agent(s) deployed</div>
+          {% set total_logs = namespace(count=0) %}
+          {% for agent in client.agents %}{% set total_logs.count = total_logs.count + agent.logs|length %}{% endfor %}
+          <div style="font-size:12px;color:var(--muted);">{{ total_logs.count }} activity events</div>
+        </div>
+
+        <button type="submit" class="btn-primary">⚡ Generate Report</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function copyReport() {
+  const text = document.getElementById('report-content').innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = event.target;
+    btn.textContent = '✓ Copied!';
+    setTimeout(() => btn.textContent = '📋 Copy', 2000);
+  });
+}
+</script>
+{% endblock %}

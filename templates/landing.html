@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vela — AI Agency Command Center</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080A0F;
+    --surface: #0D1117;
+    --surface2: #161B24;
+    --border: #1E2733;
+    --accent: #4DFFC3;
+    --accent2: #7B61FF;
+    --text: #E8EDF5;
+    --muted: #5A6478;
+    --danger: #FF4D6D;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(77,255,195,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(77,255,195,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 60px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(8,10,15,0.8);
+    backdrop-filter: blur(20px);
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--accent);
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--text); }
+  .nav-links { display: flex; gap: 32px; align-items: center; }
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 13px;
+    letter-spacing: 0.05em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .btn-nav {
+    background: var(--accent);
+    color: var(--bg) !important;
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 13px !important;
+    transition: opacity 0.2s !important;
+  }
+  .btn-nav:hover { opacity: 0.85; }
+
+  /* Hero */
+  .hero {
+    position: relative;
+    z-index: 1;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 120px 40px 80px;
+  }
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(77,255,195,0.08);
+    border: 1px solid rgba(77,255,195,0.2);
+    color: var(--accent);
+    padding: 6px 16px;
+    border-radius: 100px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    margin-bottom: 40px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-badge::before {
+    content: '';
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.8); }
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(48px, 7vw, 88px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+  h1 .line2 { color: var(--accent); }
+  .hero-sub {
+    font-size: 16px;
+    color: var(--muted);
+    max-width: 520px;
+    line-height: 1.8;
+    margin-bottom: 48px;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+  .hero-cta {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: var(--bg);
+    padding: 14px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    letter-spacing: 0.02em;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(77,255,195,0.3); }
+  .btn-secondary {
+    background: transparent;
+    color: var(--text);
+    padding: 14px 32px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-family: 'Syne', sans-serif;
+    font-weight: 600;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* Stats bar */
+  .stats-bar {
+    position: relative; z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    padding: 48px 40px;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: rgba(13,17,23,0.6);
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--accent);
+    display: block;
+  }
+  .stat-label { font-size: 12px; color: var(--muted); letter-spacing: 0.08em; }
+
+  /* Features */
+  .features {
+    position: relative; z-index: 1;
+    padding: 100px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-label {
+    font-size: 11px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(32px, 4vw, 48px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 64px;
+    max-width: 600px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+  .feature-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover { border-color: rgba(77,255,195,0.3); transform: translateY(-4px); }
+  .feature-card:hover::before { opacity: 1; }
+  .feature-icon {
+    width: 48px; height: 48px;
+    background: rgba(77,255,195,0.08);
+    border: 1px solid rgba(77,255,195,0.15);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    margin-bottom: 20px;
+  }
+  .feature-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .feature-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+
+  /* Integrations */
+  .integrations {
+    position: relative; z-index: 1;
+    padding: 80px 60px;
+    text-align: center;
+    border-top: 1px solid var(--border);
+  }
+  .integration-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: center;
+    margin-top: 40px;
+  }
+  .chip {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .chip.soon::after {
+    content: 'SOON';
+    font-size: 9px;
+    background: rgba(123,97,255,0.2);
+    color: var(--accent2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.08em;
+  }
+
+  /* CTA section */
+  .cta-section {
+    position: relative; z-index: 1;
+    padding: 100px 40px;
+    text-align: center;
+    background: radial-gradient(ellipse at center, rgba(77,255,195,0.05) 0%, transparent 70%);
+  }
+  .cta-section h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(36px, 5vw, 60px);
+    font-weight: 800;
+    letter-spacing: -1.5px;
+    margin-bottom: 20px;
+  }
+  .cta-section p { color: var(--muted); font-size: 15px; margin-bottom: 40px; }
+
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid var(--border);
+    padding: 32px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  footer p { font-size: 12px; color: var(--muted); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Dashboard preview mockup */
+  .mockup {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: -20px auto 0;
+    padding: 0 40px 80px;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+  .mockup-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 40px 120px rgba(0,0,0,0.6), 0 0 0 1px rgba(77,255,195,0.05);
+  }
+  .mockup-bar {
+    background: var(--surface2);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot.r { background: #FF5F57; }
+  .dot.y { background: #FFBD2E; }
+  .dot.g { background: #28CA42; }
+  .mockup-content { padding: 24px; }
+  .mock-stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .mock-stat {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+  }
+  .mock-stat-num {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent);
+  }
+  .mock-stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .mock-table {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .mock-row {
+    display: flex;
+    align-items: center;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    font-size: 12px;
+    gap: 16px;
+  }
+  .mock-row:last-child { border-bottom: none; }
+  .mock-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .mock-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .mock-dot.paused { background: var(--muted); }
+  .mock-dot.error { background: var(--danger); box-shadow: 0 0 8px var(--danger); }
+  .mock-name { flex: 1; color: var(--text); }
+  .mock-type { color: var(--muted); width: 100px; }
+  .mock-badge {
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 10px;
+    letter-spacing: 0.05em;
+  }
+  .mock-badge.active { background: rgba(77,255,195,0.1); color: var(--accent); }
+  .mock-badge.paused { background: rgba(90,100,120,0.2); color: var(--muted); }
+  .mock-badge.error { background: rgba(255,77,109,0.1); color: var(--danger); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Vela<span>.</span></div>
+  <div class="nav-links">
+    <a href="#features">Features</a>
+    <a href="#integrations">Integrations</a>
+    <a href="/login">Login</a>
+    <a href="/signup" class="btn-nav">Get Started</a>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge">AI Agency Infrastructure</div>
+  <h1>
+    Command every<br>
+    <span class="line2">AI agent you deploy.</span>
+  </h1>
+  <p class="hero-sub">
+    Vela is the operations platform built for AI agencies. Monitor clients, manage agents, and auto-generate reports — all from one dashboard.
+  </p>
+  <div class="hero-cta">
+    <a href="/signup" class="btn-primary">Start for free →</a>
+    <a href="/login" class="btn-secondary">Sign in</a>
+  </div>
+</section>
+
+<!-- Dashboard mockup -->
+<div class="mockup">
+  <div class="mockup-inner">
+    <div class="mockup-bar">
+      <div class="dot r"></div>
+      <div class="dot y"></div>
+      <div class="dot g"></div>
+      <span style="font-size:12px;color:var(--muted);margin-left:8px;">vela.app/dashboard</span>
+    </div>
+    <div class="mockup-content">
+      <div class="mock-stats">
+        <div class="mock-stat">
+          <div class="mock-stat-num">12</div>
+          <div class="mock-stat-label">Active Clients</div>
+        </div>
+        <div class="mock-stat">
+          <div class="mock-stat-num">34</div>
+          <div class="mock-stat-label">Deployed Agents</div>
+        </div>
+        <div class="mock-stat">
+          <div class="mock-stat-num">2.4k</div>
+          <div class="mock-stat-label">Events Today</div>
+        </div>
+        <div class="mock-stat">
+          <div class="mock-stat-num">98%</div>
+          <div class="mock-stat-label">Uptime</div>
+        </div>
+      </div>
+      <div class="mock-table">
+        <div class="mock-row" style="background:var(--surface2);color:var(--muted);font-size:11px;letter-spacing:0.08em;">
+          <span style="width:8px"></span>
+          <span style="flex:1">AGENT</span>
+          <span style="width:100px">TYPE</span>
+          <span>STATUS</span>
+        </div>
+        <div class="mock-row">
+          <div class="mock-dot active"></div>
+          <span class="mock-name">Dr. Smile Receptionist</span>
+          <span class="mock-type">Receptionist</span>
+          <span class="mock-badge active">Active</span>
+        </div>
+        <div class="mock-row">
+          <div class="mock-dot active"></div>
+          <span class="mock-name">LegalEase Support Bot</span>
+          <span class="mock-type">Support</span>
+          <span class="mock-badge active">Active</span>
+        </div>
+        <div class="mock-row">
+          <div class="mock-dot paused"></div>
+          <span class="mock-name">RealtyPro Lead Qualifier</span>
+          <span class="mock-type">Sales</span>
+          <span class="mock-badge paused">Paused</span>
+        </div>
+        <div class="mock-row">
+          <div class="mock-dot error"></div>
+          <span class="mock-name">FitLife Booking Agent</span>
+          <span class="mock-type">Booking</span>
+          <span class="mock-badge error">Error</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat">
+    <span class="stat-num">∞</span>
+    <span class="stat-label">Agents Supported</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">1-click</span>
+    <span class="stat-label">AI Reports</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">Real-time</span>
+    <span class="stat-label">Activity Logs</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num">Any</span>
+    <span class="stat-label">Platform</span>
+  </div>
+</div>
+
+<section class="features" id="features">
+  <div class="section-label">// What Vela does</div>
+  <h2 class="section-title">Everything your agency needs. Nothing it doesn't.</h2>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">👥</div>
+      <div class="feature-title">Client Management</div>
+      <p class="feature-desc">Organize all your clients in one place. Track their business type, deployed agents, and performance at a glance.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🤖</div>
+      <div class="feature-title">Agent Monitoring</div>
+      <p class="feature-desc">Monitor every agent's status in real-time. Instantly see which agents are active, paused, or throwing errors.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <div class="feature-title">Activity Logs</div>
+      <p class="feature-desc">Every conversation, booking, and handoff logged automatically. Full visibility into what your agents are doing.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">⚡</div>
+      <div class="feature-title">AI Report Generation</div>
+      <p class="feature-desc">One click generates a professional client performance report. Impress clients without spending hours writing updates.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔗</div>
+      <div class="feature-title">Webhook Integration</div>
+      <p class="feature-desc">Connect any agent platform via webhooks. n8n, Vapi, Voiceflow — if it can send data, Vela can receive it.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🚀</div>
+      <div class="feature-title">Built for Scale</div>
+      <p class="feature-desc">Start with 1 client. Scale to 100. Vela's architecture grows with your agency without breaking a sweat.</p>
+    </div>
+  </div>
+</section>
+
+<section class="integrations" id="integrations">
+  <div class="section-label">// Integrations</div>
+  <h2 class="section-title" style="margin:0 auto 16px;text-align:center;">Works with your stack.</h2>
+  <p style="color:var(--muted);font-size:14px;">Connect agents from any platform via webhooks. Native integrations coming soon.</p>
+  <div class="integration-chips">
+    <div class="chip">⚡ n8n <span class="soon"></span></div>
+    <div class="chip">🎙️ Vapi <span class="soon"></span></div>
+    <div class="chip">🌊 Voiceflow <span class="soon"></span></div>
+    <div class="chip">⚙️ Make <span class="soon"></span></div>
+    <div class="chip">📞 Bland AI <span class="soon"></span></div>
+    <div class="chip">🔗 Webhook ✓</div>
+    <div class="chip">🤖 Custom API ✓</div>
+  </div>
+</section>
+
+<section class="cta-section">
+  <h2>Your agents are live.<br>Are you watching them?</h2>
+  <p>Join the agencies already running on Vela.</p>
+  <a href="/signup" class="btn-primary">Start free today →</a>
+</section>
+
+<footer>
+  <div class="logo" style="font-size:16px;">Vela<span>.</span></div>
+  <p>Built for the AI agency era.</p>
+  <p>© 2026 Vela</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}Add Agent{% endblock %}
+{% block page_title %}Deploy Agent{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/clients">Clients</a>
+  <span>/</span>
+  <a href="/clients/{{ client.id }}">{{ client.name }}</a>
+  <span>/</span>
+  <span>New Agent</span>
+</div>
+
+<div class="card" style="max-width:600px;">
+  <div class="card-title">Agent Configuration</div>
+  <form method="POST" class="form-grid">
+    <div class="field">
+      <label>Agent Name *</label>
+      <input type="text" name="name" placeholder="Reception Bot" required>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Agent Type</label>
+        <select name="agent_type">
+          <option value="receptionist">Receptionist</option>
+          <option value="sales">Sales</option>
+          <option value="support">Support</option>
+          <option value="booking">Booking</option>
+          <option value="lead_qualifier">Lead Qualifier</option>
+          <option value="follow_up">Follow Up</option>
+          <option value="custom">Custom</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Platform</label>
+        <select name="platform">
+          <option value="n8n">n8n</option>
+          <option value="vapi">Vapi</option>
+          <option value="voiceflow">Voiceflow</option>
+          <option value="make">Make</option>
+          <option value="bland_ai">Bland AI</option>
+          <option value="custom">Custom</option>
+          <option value="webhook">Webhook Only</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea name="description" placeholder="What does this agent do? e.g. Handles incoming calls, books appointments, answers FAQs for the clinic."></textarea>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button type="submit" class="btn-primary">Deploy Agent →</button>
+      <a href="/clients/{{ client.id }}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Add Client{% endblock %}
+{% block page_title %}Add Client{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/clients">Clients</a>
+  <span>/</span>
+  <span>New Client</span>
+</div>
+
+<div class="card" style="max-width:600px;">
+  <div class="card-title">Client Details</div>
+  <form method="POST" class="form-grid">
+    <div class="form-row">
+      <div class="field">
+        <label>Client Name *</label>
+        <input type="text" name="name" placeholder="Dr. Smith's Dental Clinic" required>
+      </div>
+      <div class="field">
+        <label>Business Type</label>
+        <input type="text" name="business_type" placeholder="Dental Clinic">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="client@business.com">
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="text" name="phone" placeholder="+1 555 000 0000">
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button type="submit" class="btn-primary">Add Client →</button>
+      <a href="/clients" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

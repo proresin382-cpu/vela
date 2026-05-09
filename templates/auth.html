@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% if mode == 'signup' %}Create Account{% else %}Sign In{% endif %} — Vela</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080A0F;
+    --surface: #0D1117;
+    --surface2: #161B24;
+    --border: #1E2733;
+    --accent: #4DFFC3;
+    --text: #E8EDF5;
+    --muted: #5A6478;
+    --danger: #FF4D6D;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(77,255,195,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(77,255,195,0.03) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+  }
+  .auth-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    animation: fadeUp 0.5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    color: #4DFFC3;
+    text-align: center;
+    margin-bottom: 40px;
+    text-decoration: none;
+    display: block;
+  }
+  .logo span { color: var(--text); }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 40px;
+  }
+  h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .subtitle { font-size: 13px; color: var(--muted); margin-bottom: 32px; }
+  .error-box {
+    background: rgba(255,77,109,0.08);
+    border: 1px solid rgba(255,77,109,0.2);
+    color: var(--danger);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin-bottom: 20px;
+  }
+  .field { margin-bottom: 20px; }
+  label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input:focus { border-color: rgba(77,255,195,0.4); }
+  input::placeholder { color: var(--muted); }
+  .btn {
+    width: 100%;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    cursor: pointer;
+    margin-top: 8px;
+    transition: all 0.2s;
+  }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(77,255,195,0.25); }
+  .switch {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+  .switch a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<div class="auth-wrap">
+  <a href="/" class="logo">Vela<span>.</span></a>
+  <div class="card">
+    {% if mode == 'signup' %}
+    <h1>Create account</h1>
+    <p class="subtitle">Start managing your AI agents today.</p>
+    {% else %}
+    <h1>Welcome back</h1>
+    <p class="subtitle">Sign in to your Vela dashboard.</p>
+    {% endif %}
+
+    {% if error %}
+    <div class="error-box">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+      {% if mode == 'signup' %}
+      <div class="field">
+        <label>Agency Name</label>
+        <input type="text" name="name" placeholder="Orrin Agency" required>
+      </div>
+      {% endif %}
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" placeholder="you@agency.com" required>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" name="password" placeholder="••••••••" required>
+      </div>
+      <button type="submit" class="btn">
+        {% if mode == 'signup' %}Create Account →{% else %}Sign In →{% endif %}
+      </button>
+    </form>
+
+    <div class="switch">
+      {% if mode == 'signup' %}
+      Already have an account? <a href="/login">Sign in</a>
+      {% else %}
+      Don't have an account? <a href="/signup">Sign up free</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
