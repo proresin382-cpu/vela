@@ -366,6 +366,75 @@
   #report-content hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
   #report-content em { color: var(--muted); }
 
+  /* Mobile responsive */
+  @media (max-width: 768px) {
+    .sidebar {
+      width: 100%;
+      min-height: auto;
+      position: relative;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0;
+      border-right: none;
+      border-bottom: 1px solid var(--border);
+    }
+    .sidebar-logo { padding: 16px 20px; border-bottom: none; }
+    .sidebar-nav { display: none; }
+    .sidebar-footer { display: none; }
+    .main { margin-left: 0; }
+    .topbar { padding: 14px 20px; position: relative; }
+    .page-title { font-size: 16px; }
+    .content { padding: 20px 16px; }
+    .stats-row { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-value { font-size: 24px; }
+    div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns:1fr 360px"] { grid-template-columns: 1fr !important; }
+    div[style*="grid-template-columns:repeat(4,1fr)"] { grid-template-columns: repeat(2,1fr) !important; }
+    .table-header { display: none; }
+    .table-row { grid-template-columns: 1fr auto !important; gap: 8px; }
+    .table-row > div:nth-child(2),
+    .table-row > div:nth-child(3) { display: none; }
+    .btn-primary, .btn-secondary { padding: 8px 14px; font-size: 12px; }
+
+    /* Mobile hamburger menu */
+    .mobile-menu-btn {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 16px;
+      color: var(--text);
+      font-size: 18px;
+    }
+    .mobile-nav {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: var(--bg);
+      z-index: 200;
+      flex-direction: column;
+      padding: 24px;
+    }
+    .mobile-nav.open { display: flex; }
+    .mobile-nav-close {
+      align-self: flex-end;
+      font-size: 24px;
+      cursor: pointer;
+      color: var(--muted);
+      margin-bottom: 32px;
+    }
+    .mobile-nav .nav-item {
+      font-size: 18px;
+      padding: 16px 12px;
+    }
+  }
+  .mobile-menu-btn { display: none; }
+
   @media print {
     .sidebar, .topbar, .topbar-actions, .btn-secondary, .btn-primary { display: none !important; }
     .main { margin-left: 0 !important; }
@@ -385,6 +454,7 @@
 
 <div class="sidebar">
   <div class="sidebar-logo">Vela<span>.</span></div>
+  <button class="mobile-menu-btn" onclick="document.getElementById('mobileNav').classList.toggle('open')">☰</button>
   <nav class="sidebar-nav">
     <div class="nav-section-label">Main</div>
     <a href="/dashboard" class="nav-item {% if request.path == '/dashboard' %}active{% endif %}">
@@ -413,6 +483,13 @@
       <span>↩</span> Sign out
     </a>
   </div>
+</div>
+
+<div class="mobile-nav" id="mobileNav">
+  <span class="mobile-nav-close" onclick="document.getElementById('mobileNav').classList.remove('open')">✕</span>
+  <a href="/dashboard" class="nav-item" onclick="document.getElementById('mobileNav').classList.remove('open')">⚡ Dashboard</a>
+  <a href="/clients" class="nav-item" onclick="document.getElementById('mobileNav').classList.remove('open')">👥 Clients</a>
+  <a href="/logout" class="nav-item" style="color:var(--danger);margin-top:auto;">↩ Sign out</a>
 </div>
 
 <div class="main">
