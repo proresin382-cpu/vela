@@ -251,7 +251,7 @@ def generate_report(client_id):
     client = Client.query.get_or_404(client_id)
     report = None
     if request.method == 'POST':
-        api_key = request.form.get('api_key') or os.getenv('GEMINI_API_KEY')
+        api_key = os.getenv('OPENAI_API_KEY', '') or request.form.get('api_key', '')
         logs = ActivityLog.query.join(Agent).filter(Agent.client_id == client_id).order_by(ActivityLog.created_at.desc()).limit(50).all()
         log_summary = []
         for log in logs:
@@ -259,25 +259,33 @@ def generate_report(client_id):
         agents_info = []
         for agent in client.agents:
             agents_info.append(f"Agent: {agent.name} | Type: {agent.agent_type} | Platform: {agent.platform} | Status: {agent.status}")
-        prompt = f"""You are a professional AI agency analyst. Generate a clean, professional client performance report for the following client.
+        prompt = f"""You are a professional AI agency analyst. Write a client performance report.
 
+Agency: {session.get('agency_name', 'Vela Agency')}
 Client: {client.name}
 Business Type: {client.business_type}
+Report Date: {datetime.utcnow().strftime('%B %d, %Y')}
 
 Deployed Agents:
 {chr(10).join(agents_info) if agents_info else 'No agents deployed yet'}
 
-Recent Activity Logs (last 50 events):
+Activity Logs:
 {chr(10).join(log_summary) if log_summary else 'No activity logged yet'}
 
-Write a professional report with these sections:
+Write a professional report with:
 1. Executive Summary
 2. Agent Performance Overview
-3. Key Metrics & Highlights
-4. Issues or Alerts (if any)
+3. Key Metrics and Highlights
+4. Issues or Alerts
 5. Recommendations for Next Month
 
-Keep it concise, professional, and actionable. Format it clearly."""
+Important rules:
+- Only include activities relevant to {client.business_type}
+- Ignore any activities that do not relate to {client.business_type}
+- Use real numbers from the logs above
+- Do not use any placeholder text
+- Sign off as {session.get('agency_name', 'Vela Agency')} AI Analytics Team
+- Keep it under 400 words total"""
 
         try:
             from openai import OpenAI
