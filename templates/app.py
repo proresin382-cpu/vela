@@ -280,16 +280,35 @@ Write a professional report with these sections:
 Keep it concise, professional, and actionable. Format it clearly."""
 
         try:
-            from openai import OpenAI
-            ai = OpenAI(api_key=api_key)
-            response = ai.chat.completions.create(
-                model="gpt-4o-mini",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=1500
-            )
-            report = response.choices[0].message.content
-        except Exception as e:
-            report = f"Error generating report: {str(e)}"
+            import urllib.request
+            import json as json_lib
+            # Try Gemini first
+            gemini_key = api_key
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_key}"
+            payload = json_lib.dumps({
+                "contents": [{"parts": [{"text": prompt}]}]
+            }).encode('utf-8')
+            req = urllib.request.Request(url, data=payload, headers={'Content-Type': 'application/json'})
+            with urllib.request.urlopen(req, timeout=15) as resp:
+                data = json_lib.loads(resp.read().decode('utf-8'))
+                report = data['candidates'][0]['content']['parts'][0]['text']
+        except Exception as gemini_error:
+            # Fallback to OpenAI if Gemini fails
+            try:
+                from openai import OpenAI
+                openai_key = os.getenv('OPENAI_API_KEY', '')
+                if openai_key:
+                    ai = OpenAI(api_key=openai_key)
+                    response = ai.chat.completions.create(
+                        model="gpt-4o-mini",
+                        messages=[{"role": "user", "content": prompt}],
+                        max_tokens=1500
+                    )
+                    report = response.choices[0].message.content
+                else:
+                    report = f"Error generating report: {str(gemini_error)}"
+            except Exception as e:
+                report = f"Error generating report: {str(e)}"
 
     return render_template('report.html', client=client, report=report)
 

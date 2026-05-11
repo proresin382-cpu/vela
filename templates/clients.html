@@ -8,24 +8,28 @@
 {% block content %}
 {% if clients %}
 <div class="table-wrap">
-  <div class="table-header" style="grid-template-columns:2fr 1fr 1fr 1fr auto;">
+  <div class="table-header" style="grid-template-columns:2fr 1fr 1fr 1fr auto auto;">
     <span>Client</span>
     <span>Business Type</span>
     <span>Agents</span>
     <span>Added</span>
     <span></span>
+    <span></span>
   </div>
   {% for client in clients %}
-  <a href="/clients/{{ client.id }}" class="table-row" style="grid-template-columns:2fr 1fr 1fr 1fr auto;">
-    <div>
+  <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto auto;padding:14px 20px;border-bottom:1px solid var(--border);align-items:center;">
+    <a href="/clients/{{ client.id }}" style="text-decoration:none;color:var(--text);">
       <div style="font-size:14px;">{{ client.name }}</div>
       <div style="font-size:11px;color:var(--muted);">{{ client.email or '—' }}</div>
-    </div>
+    </a>
     <div style="color:var(--muted);font-size:13px;">{{ client.business_type or '—' }}</div>
     <div style="font-size:13px;">{{ client.agents|length }}</div>
     <div style="color:var(--muted);font-size:12px;">{{ client.created_at.strftime('%b %d') }}</div>
-    <div style="color:var(--accent);font-size:13px;">→</div>
-  </a>
+    <a href="/clients/{{ client.id }}/edit" style="color:var(--muted);font-size:12px;text-decoration:none;padding:5px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;">✏️ Edit</a>
+    <form method="POST" action="/clients/{{ client.id }}/delete" onsubmit="return confirm('Delete {{ client.name }}? This will also delete all their agents and logs.')">
+      <button type="submit" style="color:var(--danger);font-size:12px;background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.2);border-radius:6px;padding:5px 10px;cursor:pointer;font-family:'DM Mono',monospace;">🗑 Delete</button>
+    </form>
+  </div>
   {% endfor %}
 </div>
 {% else %}

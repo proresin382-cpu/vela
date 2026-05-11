@@ -1,0 +1,235 @@
+{% extends "base.html" %}
+{% block title %}Pricing{% endblock %}
+{% block page_title %}Pricing{% endblock %}
+
+{% block content %}
+<style>
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+.plan {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 32px;
+  position: relative;
+  transition: border-color 0.3s;
+}
+.plan:hover { border-color: rgba(77,255,195,0.3); }
+.plan.popular {
+  border-color: rgba(77,255,195,0.4);
+  background: linear-gradient(135deg, rgba(77,255,195,0.04), var(--surface));
+}
+.popular-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent);
+  color: var(--bg);
+  padding: 4px 16px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  font-family: 'Syne', sans-serif;
+  white-space: nowrap;
+}
+.plan-name {
+  font-family: 'Syne', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+}
+.plan-price {
+  font-family: 'Syne', sans-serif;
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -2px;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.plan-price span {
+  font-size: 18px;
+  color: var(--muted);
+  font-weight: 400;
+  letter-spacing: 0;
+}
+.plan-desc {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+.plan-features {
+  list-style: none;
+  margin-bottom: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.plan-features li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text);
+}
+.plan-features li::before {
+  content: '✓';
+  color: var(--accent);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.plan-features li.disabled {
+  color: var(--muted);
+}
+.plan-features li.disabled::before {
+  content: '—';
+  color: var(--muted);
+}
+.plan-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  padding: 13px;
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+.plan-btn.primary {
+  background: var(--accent);
+  color: var(--bg);
+}
+.plan-btn.primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(77,255,195,0.25); }
+.plan-btn.secondary {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+.plan-btn.secondary:hover { border-color: var(--accent); color: var(--accent); }
+.trial-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(77,255,195,0.08);
+  border: 1px solid rgba(77,255,195,0.2);
+  color: var(--accent);
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+@media (max-width: 768px) {
+  .pricing-grid { grid-template-columns: 1fr; }
+}
+</style>
+
+<!-- Header -->
+<div style="text-align:center;margin-bottom:48px;">
+  <div class="trial-badge">🎁 16-day free trial — no credit card required</div>
+  <h1 style="font-family:'Syne',sans-serif;font-size:clamp(28px,4vw,44px);font-weight:800;letter-spacing:-1.5px;margin-bottom:12px;">Simple, transparent pricing.</h1>
+  <p style="color:var(--muted);font-size:15px;max-width:500px;margin:0 auto;line-height:1.7;">Start free. Scale as you grow. Cancel anytime.</p>
+</div>
+
+<!-- Pricing cards -->
+<div class="pricing-grid">
+
+  <!-- Starter -->
+  <div class="plan">
+    <div class="plan-name">Starter</div>
+    <div class="plan-price">$49<span>/mo</span></div>
+    <p class="plan-desc">Perfect for solo AI builders managing a few clients.</p>
+    <ul class="plan-features">
+      <li>Up to 5 clients</li>
+      <li>Up to 10 agents</li>
+      <li>Activity logs</li>
+      <li>Webhook integrations</li>
+      <li>AI report generation</li>
+      <li>Email support</li>
+      <li class="disabled">Custom branding</li>
+      <li class="disabled">Priority support</li>
+    </ul>
+    <a href="/signup" class="plan-btn secondary">Start free trial →</a>
+  </div>
+
+  <!-- Growth (Popular) -->
+  <div class="plan popular">
+    <div class="popular-badge">MOST POPULAR</div>
+    <div class="plan-name">Growth</div>
+    <div class="plan-price">$99<span>/mo</span></div>
+    <p class="plan-desc">For growing agencies with multiple clients and agents.</p>
+    <ul class="plan-features">
+      <li>Up to 20 clients</li>
+      <li>Up to 50 agents</li>
+      <li>Activity logs</li>
+      <li>Webhook integrations</li>
+      <li>AI report generation</li>
+      <li>Priority email support</li>
+      <li>Custom branding</li>
+      <li class="disabled">Dedicated support</li>
+    </ul>
+    <a href="/signup" class="plan-btn primary">Start free trial →</a>
+  </div>
+
+  <!-- Agency -->
+  <div class="plan">
+    <div class="plan-name">Agency</div>
+    <div class="plan-price">$199<span>/mo</span></div>
+    <p class="plan-desc">For established agencies running at scale.</p>
+    <ul class="plan-features">
+      <li>Unlimited clients</li>
+      <li>Unlimited agents</li>
+      <li>Activity logs</li>
+      <li>Webhook integrations</li>
+      <li>AI report generation</li>
+      <li>Dedicated support</li>
+      <li>Custom branding</li>
+      <li>White-label option</li>
+    </ul>
+    <a href="/signup" class="plan-btn secondary">Start free trial →</a>
+  </div>
+
+</div>
+
+<!-- Trial info -->
+<div style="text-align:center;margin-top:48px;padding:28px;background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:600px;margin-left:auto;margin-right:auto;margin-top:40px;">
+  <div style="font-family:'Syne',sans-serif;font-size:18px;font-weight:800;margin-bottom:10px;">16 days free. No credit card needed.</div>
+  <p style="font-size:13px;color:var(--muted);line-height:1.8;margin-bottom:20px;">Start your free trial today. Full access to all features. No commitment. Cancel anytime before the trial ends and you won't be charged.</p>
+  <a href="/signup" class="plan-btn primary" style="display:inline-block;padding:13px 40px;width:auto;">Get started free →</a>
+</div>
+
+<!-- FAQ -->
+<div style="max-width:700px;margin:60px auto 0;">
+  <h2 style="font-family:'Syne',sans-serif;font-size:22px;font-weight:800;text-align:center;margin-bottom:32px;">Common questions</h2>
+  <div style="display:flex;flex-direction:column;gap:16px;">
+    {% for q, a in [
+      ('Do I need a credit card to start?', 'No. Your 16-day free trial starts immediately with no credit card required.'),
+      ('What happens after the trial?', 'You can choose a plan that fits your agency. If you don\'t upgrade, your account is paused — your data stays safe.'),
+      ('Can I change plans later?', 'Yes, upgrade or downgrade anytime. Changes take effect immediately.'),
+      ('How do webhooks work?', 'Each agent gets a unique webhook URL. Paste it in your agent platform (n8n, Vapi, Make etc.) and events flow into Vela automatically.'),
+      ('Is my data secure?', 'Yes. All data is encrypted in transit (HTTPS). Each agency only sees their own clients and agents.'),
+    ] %}
+    <div style="padding:20px;background:var(--surface);border:1px solid var(--border);border-radius:12px;">
+      <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;margin-bottom:8px;color:var(--text);">{{ q }}</div>
+      <div style="font-size:13px;color:var(--muted);line-height:1.7;">{{ a }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

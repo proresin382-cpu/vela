@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Privacy Policy{% endblock %}
+{% block page_title %}Privacy Policy{% endblock %}
+
+{% block content %}
+<div style="max-width:700px;margin:0 auto;">
+  <div style="margin-bottom:32px;">
+    <p style="color:var(--muted);font-size:13px;">Last updated: May 10, 2026</p>
+  </div>
+
+  {% for section in [
+    ('1. Information We Collect', 'We collect information you provide when creating an account (name, email, password), information about your clients and agents that you add to Vela, activity logs sent via webhooks from your agent platforms, and usage data to improve the product.'),
+    ('2. How We Use Your Information', 'We use your information to provide and operate the Vela platform, generate AI-powered reports for your clients, send important service updates, and improve our product. We never sell your data to third parties.'),
+    ('3. Data Storage and Security', 'All data is stored on secure servers. Data is encrypted in transit using HTTPS/TLS. Each agency account is completely isolated — you can only access your own clients and agents. We use industry-standard security practices.'),
+    ('4. Webhook Data', 'When your agent platforms send data to Vela via webhooks, we store the event type, summary, outcome, and source IP address. This data is only visible to your agency account. We log source IPs to help you verify connections.'),
+    ('5. Data Retention', 'Your data is retained as long as your account is active. You can delete your account and all associated data at any time by contacting us at privacy@tryvela.io. We will process deletion requests within 30 days.'),
+    ('6. Third-Party Services', 'Vela uses OpenAI to generate client reports. When you generate a report, your agent activity data is sent to OpenAI for processing. OpenAI\'s privacy policy applies to this data. We do not share your data with any other third parties.'),
+    ('7. Cookies', 'We use session cookies to keep you logged in. We do not use tracking cookies or advertising cookies. You can disable cookies in your browser but this will prevent you from logging in.'),
+    ('8. Your Rights', 'You have the right to access your data, correct inaccurate data, delete your data, and export your data. Contact us at privacy@tryvela.io to exercise these rights.'),
+    ('9. Changes to This Policy', 'We may update this privacy policy from time to time. We will notify you of significant changes by email. Continued use of Vela after changes means you accept the updated policy.'),
+    ('10. Contact', 'For privacy-related questions, contact us at privacy@tryvela.io or through the support channel in your dashboard.'),
+  ] %}
+  <div style="margin-bottom:28px;">
+    <h2 style="font-family:'Syne',sans-serif;font-size:17px;font-weight:700;color:var(--accent);margin-bottom:10px;">{{ section[0] }}</h2>
+    <p style="font-size:14px;color:var(--muted);line-height:1.8;">{{ section[1] }}</p>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

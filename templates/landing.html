@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
 <title>Vela — AI Agency Command Center</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -322,15 +323,23 @@
   @media (max-width: 768px) {
     nav { padding: 16px 20px; }
     .nav-links { display: none; }
-    h1 { letter-spacing: -1px; }
+    h1 { font-size: 42px !important; letter-spacing: -1px; }
     .hero { padding: 100px 24px 60px; }
+    .hero-sub { font-size: 14px; }
+    .hero-cta { flex-direction: column; align-items: stretch; }
+    .btn-primary, .btn-secondary { text-align: center; }
     .mockup { padding: 0 16px 60px; }
     .mock-stats { grid-template-columns: repeat(2,1fr); }
-    .stats-bar { gap: 24px; padding: 32px 24px; flex-wrap: wrap; }
-    .features { padding: 60px 24px; }
+    .mock-stat-num { font-size: 20px; }
+    .stats-bar { gap: 20px; padding: 28px 20px; flex-wrap: wrap; justify-content: center; }
+    .stat-num { font-size: 28px; }
+    .features { padding: 60px 20px; }
+    .section-title { font-size: 28px !important; }
     .features-grid { grid-template-columns: 1fr; }
-    .integrations { padding: 60px 24px; }
-    .cta-section { padding: 60px 24px; }
+    .integrations { padding: 50px 20px; }
+    .integration-chips { gap: 8px; }
+    .cta-section { padding: 60px 20px; }
+    .cta-section h2 { font-size: 32px !important; }
     footer { padding: 24px 20px; flex-direction: column; gap: 8px; text-align: center; }
   }
 
@@ -429,6 +438,7 @@
   <div class="nav-links">
     <a href="#features">Features</a>
     <a href="#integrations">Integrations</a>
+    <a href="/pricing">Pricing</a>
     <a href="/login">Login</a>
     <a href="/signup" class="btn-nav">Get Started</a>
   </div>
@@ -593,6 +603,11 @@
 <footer>
   <div class="logo" style="font-size:16px;">Vela<span>.</span></div>
   <p>Built for the AI agency era.</p>
+  <div style="display:flex;gap:20px;">
+    <a href="/pricing" style="color:var(--muted);text-decoration:none;font-size:12px;">Pricing</a>
+    <a href="/privacy" style="color:var(--muted);text-decoration:none;font-size:12px;">Privacy</a>
+    <a href="/terms" style="color:var(--muted);text-decoration:none;font-size:12px;">Terms</a>
+  </div>
   <p>© 2026 Vela</p>
 </footer>
 

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>404 — Page Not Found | Vela</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #080A0F;
+  color: #E8EDF5;
+  font-family: 'DM Mono', monospace;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(77,255,195,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(77,255,195,0.03) 1px, transparent 1px);
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+.content { position: relative; padding: 40px 20px; }
+.num {
+  font-family: 'Syne', sans-serif;
+  font-size: 120px;
+  font-weight: 800;
+  color: #4DFFC3;
+  opacity: 0.15;
+  line-height: 1;
+  letter-spacing: -4px;
+  margin-bottom: -20px;
+}
+h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 800;
+  margin-bottom: 12px;
+  letter-spacing: -0.5px;
+}
+p { color: #5A6478; font-size: 14px; margin-bottom: 32px; line-height: 1.7; }
+a {
+  display: inline-block;
+  background: #4DFFC3;
+  color: #080A0F;
+  padding: 12px 28px;
+  border-radius: 8px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+</style>
+</head>
+<body>
+<div class="content">
+  <div class="num">404</div>
+  <h1>Page not found</h1>
+  <p>The page you're looking for doesn't exist.<br>It may have been moved or deleted.</p>
+  <a href="/">← Back to Vela</a>
+</div>
+</body>
+</html>

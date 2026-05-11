@@ -13,6 +13,36 @@
   <span>{{ client.name }}</span>
 </div>
 
+<!-- Mobile only action buttons -->
+<div style="display:none;" class="mobile-actions">
+  <a href="/clients/{{ client.id }}/report" class="btn-secondary" style="flex:1;text-align:center;">⚡ Report</a>
+  <a href="/clients/{{ client.id }}/agents/add" class="btn-primary" style="flex:1;text-align:center;">+ Agent</a>
+</div>
+
+<style>
+@media (max-width: 768px) {
+  .mobile-actions { display: flex !important; gap: 10px; margin-bottom: 16px; }
+  .webhook-tabs { flex-wrap: wrap; }
+  .snippet-box { font-size: 11px; }
+}
+.tab-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 7px 16px; border-radius: 8px; font-family: 'DM Mono', monospace; font-size: 12px; cursor: pointer; transition: all 0.2s; }
+.tab-btn.active { background: rgba(77,255,195,0.1); border-color: rgba(77,255,195,0.3); color: var(--accent); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+.snippet-box { background: #020408; border: 1px solid var(--border); border-radius: 10px; padding: 16px; font-size: 12px; line-height: 1.8; color: #8899AA; overflow-x: auto; position: relative; white-space: pre; }
+.snippet-box .kw { color: #7B61FF; }
+.snippet-box .str { color: #4DFFC3; }
+.snippet-box .cm { color: #3A4556; }
+.snippet-box .url { color: #FFB547; }
+.copy-snippet-btn { position: absolute; top: 10px; right: 10px; background: var(--surface2); border: 1px solid var(--border); color: var(--muted); padding: 4px 10px; border-radius: 6px; font-size: 10px; cursor: pointer; font-family: 'DM Mono', monospace; }
+.copy-snippet-btn:hover { color: var(--accent); border-color: var(--accent); }
+.webhook-url-box { display: flex; gap: 10px; align-items: center; background: #020408; border: 1px solid rgba(77,255,195,0.2); border-radius: 10px; padding: 12px 16px; }
+.webhook-url-text { flex: 1; font-size: 13px; color: var(--accent); font-family: 'DM Mono', monospace; word-break: break-all; }
+.copy-url-btn { background: rgba(77,255,195,0.1); border: 1px solid rgba(77,255,195,0.2); color: var(--accent); padding: 6px 14px; border-radius: 6px; font-size: 12px; cursor: pointer; font-family: 'DM Mono', monospace; white-space: nowrap; flex-shrink: 0; }
+.step-badge { width: 24px; height: 24px; background: rgba(77,255,195,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--accent); font-weight: 700; flex-shrink: 0; }
+</style>
+
+<!-- Client info -->
 <div style="display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center;margin-bottom:28px;padding:20px 24px;background:var(--surface);border:1px solid var(--border);border-radius:14px;">
   <div style="width:52px;height:52px;background:rgba(77,255,195,0.1);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:22px;font-weight:800;color:var(--accent);">
     {{ client.name[0].upper() }}
@@ -37,7 +67,8 @@
   </div>
 </div>
 
-<div class="card">
+<!-- Agents -->
+<div class="card" style="margin-bottom:20px;">
   <div class="card-title">
     Deployed Agents
     <a href="/clients/{{ client.id }}/agents/add" style="font-size:12px;color:var(--accent);text-decoration:none;">+ Add Agent</a>
@@ -57,8 +88,12 @@
       <div style="color:var(--muted);font-size:13px;text-transform:capitalize;">{{ agent.agent_type or '—' }}</div>
       <div style="color:var(--muted);font-size:13px;">{{ agent.platform or '—' }}</div>
       <div style="font-size:13px;" id="event-count-{{ agent.id }}">{{ agent.logs|length }}</div>
-      <div><span class="badge {{ agent.status }}" id="status-badge-{{ agent.id }}">{{ agent.status }}</span></div>
-      <div style="display:flex;gap:8px;">
+      <div>
+        <span class="badge {{ agent.status }}" id="status-badge-{{ agent.id }}">{{ agent.status }}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <!-- Connection status indicator -->
+        <span id="conn-status-{{ agent.id }}" style="font-size:11px;color:var(--muted);">checking...</span>
         <button onclick="toggleStatus({{ agent.id }})" id="toggle-btn-{{ agent.id }}"
           style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">
           {% if agent.status == 'active' %}⏸ Pause{% else %}▶ Activate{% endif %}
@@ -67,8 +102,17 @@
           style="background:rgba(77,255,195,0.08);border:1px solid rgba(77,255,195,0.2);color:var(--accent);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">
           ⚡ Test
         </button>
+        <button onclick="toggleSetup({{ agent.id }})"
+          style="background:rgba(123,97,255,0.08);border:1px solid rgba(123,97,255,0.2);color:#7B61FF;padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">
+          🔗 Connect
+        </button>
+        <form method="POST" action="/agents/{{ agent.id }}/delete" style="display:inline;" onsubmit="return confirm('Delete {{ agent.name }}? This will remove all activity logs too.')">
+          <button type="submit" style="background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.2);color:var(--danger);padding:5px 10px;border-radius:6px;font-size:11px;cursor:pointer;font-family:'DM Mono',monospace;">🗑</button>
+        </form>
       </div>
     </div>
+
+    <!-- Activity feed -->
     <div style="background:rgba(0,0,0,0.2);padding:16px 20px;border-bottom:1px solid var(--border);" id="log-feed-{{ agent.id }}">
       <div style="font-size:11px;color:var(--muted);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:12px;">Recent Activity</div>
       {% for log in agent.logs[-5:]|reverse %}
@@ -83,19 +127,175 @@
         </div>
       </div>
       {% endfor %}
+      {% if not agent.logs %}
+      <div style="font-size:13px;color:var(--muted);text-align:center;padding:12px 0;">No activity yet — connect your agent to start receiving events</div>
+      {% endif %}
     </div>
-    {% endfor %}
-  </div>
 
-  <div style="margin-top:20px;padding:16px;background:rgba(77,255,195,0.04);border:1px solid rgba(77,255,195,0.1);border-radius:10px;">
-    <div style="font-size:11px;color:var(--accent);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;">📡 Webhook Endpoints</div>
-    {% for agent in client.agents %}
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid rgba(77,255,195,0.05);">
-      <span style="font-size:12px;color:var(--muted);">{{ agent.name }}</span>
-      <code style="font-size:11px;color:var(--accent);background:rgba(77,255,195,0.05);padding:3px 10px;border-radius:4px;">POST /webhook/{{ agent.id }}</code>
+    <!-- Webhook Setup Wizard (hidden by default) -->
+    <div id="setup-{{ agent.id }}" style="display:none;background:rgba(123,97,255,0.03);border-bottom:1px solid var(--border);padding:24px 20px;">
+      <div style="font-size:13px;color:#7B61FF;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:8px;">
+        🔗 Connect {{ agent.name }} to Vela
+      </div>
+
+      <!-- Step 1: Webhook URL -->
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div class="step-badge">1</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;color:var(--text);margin-bottom:8px;font-weight:600;">Copy your webhook URL</div>
+          <div class="webhook-url-box">
+            <span class="webhook-url-text" id="wh-url-{{ agent.id }}">https://tryvela.io/webhook/{{ agent.id }}</span>
+            <button class="copy-url-btn" onclick="copyUrl({{ agent.id }})">📋 Copy</button>
+          </div>
+          <div style="font-size:11px;color:var(--muted);margin-top:6px;">This is your unique endpoint. Paste it in your agent platform.</div>
+        </div>
+      </div>
+
+      <!-- Step 2: Platform guide -->
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div class="step-badge">2</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;color:var(--text);margin-bottom:12px;font-weight:600;">Choose your platform</div>
+          <div class="webhook-tabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;">
+            <button class="tab-btn active" onclick="showTab({{ agent.id }}, 'n8n', this)">⚡ n8n</button>
+            <button class="tab-btn" onclick="showTab({{ agent.id }}, 'vapi', this)">🎙️ Vapi</button>
+            <button class="tab-btn" onclick="showTab({{ agent.id }}, 'make', this)">⚙️ Make</button>
+            <button class="tab-btn" onclick="showTab({{ agent.id }}, 'curl', this)">💻 cURL</button>
+            <button class="tab-btn" onclick="showTab({{ agent.id }}, 'python', this)">🐍 Python</button>
+          </div>
+
+          <!-- n8n -->
+          <div id="tab-{{ agent.id }}-n8n" class="tab-content active">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+              In your n8n workflow, add an <strong style="color:var(--text);">HTTP Request</strong> node at the end:
+            </div>
+            <div class="snippet-box" id="snip-{{ agent.id }}-n8n"><span class="cm">// HTTP Request Node Settings</span>
+<span class="kw">Method:</span> <span class="str">POST</span>
+<span class="kw">URL:</span> <span class="url">https://tryvela.io/webhook/{{ agent.id }}</span>
+<span class="kw">Body Type:</span> <span class="str">JSON</span>
+<span class="kw">Body:</span>
+{
+  <span class="str">"event_type"</span>: <span class="str">"conversation"</span>,
+  <span class="str">"summary"</span>: <span class="str">"{{ '{{' }}$json.summary{{ '}}' }}"</span>,
+  <span class="str">"outcome"</span>: <span class="str">"success"</span>
+}<button class="copy-snippet-btn" onclick="copySnippet('snip-{{ agent.id }}-n8n')">Copy</button></div>
+          </div>
+
+          <!-- Vapi -->
+          <div id="tab-{{ agent.id }}-vapi" class="tab-content">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+              In Vapi, go to your assistant settings → <strong style="color:var(--text);">Server URL</strong> → add a webhook:
+            </div>
+            <div class="snippet-box" id="snip-{{ agent.id }}-vapi"><span class="cm">// Vapi Server URL Settings</span>
+<span class="kw">Server URL:</span> <span class="url">https://tryvela.io/webhook/{{ agent.id }}</span>
+<span class="kw">Events to send:</span> <span class="str">end-of-call-report</span>
+
+<span class="cm">// Vapi sends this automatically after each call</span>
+<span class="cm">// Vela will receive and log it instantly</span><button class="copy-snippet-btn" onclick="copySnippet('snip-{{ agent.id }}-vapi')">Copy</button></div>
+          </div>
+
+          <!-- Make -->
+          <div id="tab-{{ agent.id }}-make" class="tab-content">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+              In Make (formerly Integromat), add an <strong style="color:var(--text);">HTTP → Make a request</strong> module:
+            </div>
+            <div class="snippet-box" id="snip-{{ agent.id }}-make"><span class="cm">// Make HTTP Module Settings</span>
+<span class="kw">URL:</span> <span class="url">https://tryvela.io/webhook/{{ agent.id }}</span>
+<span class="kw">Method:</span> <span class="str">POST</span>
+<span class="kw">Body type:</span> <span class="str">Raw</span>
+<span class="kw">Content type:</span> <span class="str">application/json</span>
+<span class="kw">Body:</span>
+{
+  <span class="str">"event_type"</span>: <span class="str">"conversation"</span>,
+  <span class="str">"summary"</span>: <span class="str">"{{1.summary}}"</span>,
+  <span class="str">"outcome"</span>: <span class="str">"success"</span>
+}<button class="copy-snippet-btn" onclick="copySnippet('snip-{{ agent.id }}-make')">Copy</button></div>
+          </div>
+
+          <!-- cURL -->
+          <div id="tab-{{ agent.id }}-curl" class="tab-content">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+              Test your webhook connection directly from terminal:
+            </div>
+            <div class="snippet-box" id="snip-{{ agent.id }}-curl"><span class="kw">curl</span> -X POST <span class="url">https://tryvela.io/webhook/{{ agent.id }}</span> \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{
+    "event_type": "conversation",
+    "summary": "Test event from terminal",
+    "outcome": "success"
+  }'</span><button class="copy-snippet-btn" onclick="copySnippet('snip-{{ agent.id }}-curl')">Copy</button></div>
+          </div>
+
+          <!-- Python -->
+          <div id="tab-{{ agent.id }}-python" class="tab-content">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:10px;line-height:1.7;">
+              Send events from any Python script or agent:
+            </div>
+            <div class="snippet-box" id="snip-{{ agent.id }}-python"><span class="kw">import</span> requests
+
+<span class="kw">def</span> <span class="str">log_to_vela</span>(event_type, summary, outcome=<span class="str">"success"</span>):
+    requests.post(
+        <span class="url">"https://tryvela.io/webhook/{{ agent.id }}"</span>,
+        json={
+            <span class="str">"event_type"</span>: event_type,
+            <span class="str">"summary"</span>: summary,
+            <span class="str">"outcome"</span>: outcome
+        }
+    )
+
+<span class="cm"># Call this anywhere in your agent code</span>
+log_to_vela(<span class="str">"booking"</span>, <span class="str">"Appointment booked for tomorrow"</span>)<button class="copy-snippet-btn" onclick="copySnippet('snip-{{ agent.id }}-python')">Copy</button></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Payload reference -->
+      <div style="display:flex;gap:12px;margin-bottom:20px;">
+        <div class="step-badge">3</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;color:var(--text);margin-bottom:8px;font-weight:600;">Payload reference</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;">
+            <div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+              <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">event_type</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.6;">conversation<br>booking<br>handoff<br>error<br>follow_up</div>
+            </div>
+            <div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+              <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">summary</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.6;">Any string describing what happened</div>
+            </div>
+            <div style="padding:12px;background:var(--surface2);border-radius:8px;border:1px solid var(--border);">
+              <div style="font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:6px;">outcome</div>
+              <div style="font-size:11px;color:var(--muted);line-height:1.6;">success<br>failed<br>pending</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Test live -->
+      <div style="display:flex;gap:12px;">
+        <div class="step-badge">4</div>
+        <div style="flex:1;">
+          <div style="font-size:13px;color:var(--text);margin-bottom:8px;font-weight:600;">Test your connection</div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+            <button onclick="testWebhook({{ agent.id }})"
+              style="background:rgba(77,255,195,0.1);border:1px solid rgba(77,255,195,0.3);color:var(--accent);padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Mono',monospace;">
+              ⚡ Send test event now
+            </button>
+            <button onclick="checkConnection({{ agent.id }})"
+              style="background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Mono',monospace;">
+              🔄 Check status
+            </button>
+            <button onclick="disconnectAgent({{ agent.id }})"
+              style="background:rgba(255,77,109,0.08);border:1px solid rgba(255,77,109,0.2);color:var(--danger);padding:10px 20px;border-radius:8px;font-size:13px;cursor:pointer;font-family:'DM Mono',monospace;">
+              ✕ Disconnect
+            </button>
+          </div>
+          <div id="conn-detail-{{ agent.id }}" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+        </div>
+      </div>
     </div>
+
     {% endfor %}
-    <p style="font-size:11px;color:var(--muted);margin-top:10px;">Connect n8n, Vapi, Voiceflow or any platform via these webhook URLs</p>
   </div>
 
   {% else %}
@@ -113,6 +313,44 @@
 </div>
 
 <script>
+// Check connection status on page load for all agents
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('[id^="conn-status-"]').forEach(el => {
+    const agentId = el.id.replace('conn-status-', '');
+    checkConnection(agentId);
+  });
+});
+
+function checkConnection(agentId) {
+  const statusEl = document.getElementById('conn-status-' + agentId);
+  const detailEl = document.getElementById('conn-detail-' + agentId);
+  fetch('/agents/' + agentId + '/connection-status')
+    .then(r => r.json())
+    .then(data => {
+      if (data.connected) {
+        statusEl.innerHTML = '<span style="color:#4DFFC3;">● Connected</span>';
+        if (detailEl) {
+          detailEl.innerHTML = '✅ External events received — Last: <strong style="color:var(--text);">' + data.last_received + '</strong> from <code style="color:var(--accent);">' + data.source_ip + '</code> — Total: <strong style="color:var(--text);">' + data.total_external + '</strong> external events';
+        }
+      } else {
+        statusEl.innerHTML = '<span style="color:var(--muted);">○ Not connected</span>';
+        if (detailEl) {
+          detailEl.innerHTML = 'No external events received yet. Copy the webhook URL above and paste it in your agent platform.';
+        }
+      }
+    });
+}
+
+function disconnectAgent(agentId) {
+  if (!confirm('This will clear the connection history. Are you sure?')) return;
+  fetch('/agents/' + agentId + '/disconnect', {method:'POST'})
+    .then(r => r.json())
+    .then(() => {
+      checkConnection(agentId);
+      showToast('Agent disconnected', 'success');
+    });
+}
+
 function showToast(message, type) {
   const toast = document.getElementById('toast');
   const content = document.getElementById('toast-content');
@@ -122,6 +360,29 @@ function showToast(message, type) {
   toast.style.display = 'block';
   toast.style.borderColor = color + '33';
   setTimeout(() => toast.style.display = 'none', 3000);
+}
+
+function toggleSetup(agentId) {
+  const el = document.getElementById('setup-' + agentId);
+  el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function showTab(agentId, tab, btn) {
+  document.querySelectorAll('[id^="tab-'+agentId+'-"]').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('#setup-'+agentId+' .tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+agentId+'-'+tab).classList.add('active');
+  btn.classList.add('active');
+}
+
+function copyUrl(agentId) {
+  const url = document.getElementById('wh-url-' + agentId).textContent;
+  navigator.clipboard.writeText(url).then(() => showToast('Webhook URL copied!', 'success'));
+}
+
+function copySnippet(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText.replace('Copy', '').trim();
+  navigator.clipboard.writeText(text).then(() => showToast('Code copied!', 'success'));
 }
 
 function toggleStatus(agentId) {
@@ -147,20 +408,36 @@ function testWebhook(agentId) {
   const feed = document.getElementById('log-feed-' + agentId);
   btn.textContent = '⏳ Sending...';
   btn.disabled = true;
-  fetch('/agents/' + agentId + '/test-webhook', {method:'POST'})
-    .then(r => r.json())
-    .then(data => {
-      const current = parseInt(countEl.textContent) || 0;
-      countEl.textContent = current + 1;
-      const now = new Date();
-      const timeStr = now.toLocaleDateString('en-US',{month:'short',day:'2-digit'}) + ', ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
-      const dotColor = data.outcome === 'success' ? 'var(--accent)' : 'var(--danger)';
-      const newLog = '<div class="log-item" style="animation:fadeUp 0.3s ease both;"><div class="log-dot '+data.outcome+'" style="background:'+dotColor+';box-shadow:0 0 6px '+dotColor+';"></div><div class="log-content"><div class="log-summary">'+data.summary+'</div><div class="log-meta" style="display:flex;gap:8px;align-items:center;margin-top:3px;"><span class="log-type">'+data.event_type+'</span><span>'+timeStr+'</span></div></div></div>';
-      feed.querySelector('div').insertAdjacentHTML('afterend', newLog);
-      btn.textContent = '⚡ Test';
-      btn.disabled = false;
-      showToast('Event received: ' + data.event_type, 'success');
-    });
+
+  // Send real POST to the actual webhook endpoint
+  fetch('/webhook/' + agentId, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      event_type: 'conversation',
+      summary: 'Test event sent from Vela dashboard',
+      outcome: 'success'
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    const current = parseInt(countEl.textContent) || 0;
+    countEl.textContent = current + 1;
+    const now = new Date();
+    const timeStr = now.toLocaleDateString('en-US',{month:'short',day:'2-digit'}) + ', ' + now.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const newLog = '<div class="log-item" style="animation:fadeUp 0.3s ease both;"><div class="log-dot success" style="background:var(--accent);box-shadow:0 0 6px var(--accent);"></div><div class="log-content"><div class="log-summary">Test event sent from Vela dashboard</div><div class="log-meta" style="display:flex;gap:8px;align-items:center;margin-top:3px;"><span class="log-type">conversation</span><span>'+timeStr+'</span></div></div></div>';
+    const noActivity = feed.querySelector('[style*="No activity yet"]');
+    if (noActivity) noActivity.remove();
+    feed.querySelector('div').insertAdjacentHTML('afterend', newLog);
+    btn.textContent = '⚡ Test';
+    btn.disabled = false;
+    showToast('Real webhook received! ✓', 'success');
+  })
+  .catch(() => {
+    btn.textContent = '⚡ Test';
+    btn.disabled = false;
+    showToast('Webhook failed', 'error');
+  });
 }
 </script>
 {% endblock %}

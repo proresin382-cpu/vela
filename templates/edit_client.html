@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block title %}Edit {{ client.name }}{% endblock %}
+{% block page_title %}Edit Client{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+  <a href="/clients">Clients</a>
+  <span>/</span>
+  <a href="/clients/{{ client.id }}">{{ client.name }}</a>
+  <span>/</span>
+  <span>Edit</span>
+</div>
+
+<div class="card" style="max-width:600px;">
+  <div class="card-title">Edit Client Details</div>
+  <form method="POST" class="form-grid">
+    <div class="form-row">
+      <div class="field">
+        <label>Client Name *</label>
+        <input type="text" name="name" value="{{ client.name }}" required>
+      </div>
+      <div class="field">
+        <label>Business Type</label>
+        <input type="text" name="business_type" value="{{ client.business_type or '' }}">
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" name="email" value="{{ client.email or '' }}">
+      </div>
+      <div class="field">
+        <label>Phone</label>
+        <input type="text" name="phone" value="{{ client.phone or '' }}">
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;margin-top:8px;">
+      <button type="submit" class="btn-primary">Save Changes →</button>
+      <a href="/clients/{{ client.id }}" class="btn-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}
