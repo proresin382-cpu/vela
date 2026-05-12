@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Security Audit{% endblock %}
+{% block page_title %}Security Audit{% endblock %}
+
+{% block content %}
+<style>
+.risk-high { color: #FF4D6D; }
+.risk-med { color: #FFB547; }
+.risk-low { color: #4DFFC3; }
+.verdict-allow { background: rgba(77,255,195,0.1); color: #4DFFC3; border: 1px solid rgba(77,255,195,0.2); padding: 3px 10px; border-radius: 100px; font-size: 11px; }
+.verdict-deny { background: rgba(255,77,109,0.1); color: #FF4D6D; border: 1px solid rgba(255,77,109,0.2); padding: 3px 10px; border-radius: 100px; font-size: 11px; }
+.verdict-log { background: rgba(255,181,71,0.1); color: #FFB547; border: 1px solid rgba(255,181,71,0.2); padding: 3px 10px; border-radius: 100px; font-size: 11px; }
+</style>
+
+<!-- Stats row -->
+<div class="stats-row" style="margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-label">Total Inspected</div>
+    <div class="stat-value" style="color:var(--accent);">{{ stats.total }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Allowed</div>
+    <div class="stat-value" style="color:#4DFFC3;">{{ stats.allowed }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Blocked</div>
+    <div class="stat-value" style="color:#FF4D6D;">{{ stats.blocked }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Avg Risk Score</div>
+    <div class="stat-value" style="color:#FFB547;">{{ stats.avg_risk }}</div>
+  </div>
+</div>
+
+<!-- Security status banner -->
+<div style="padding:16px 20px;background:rgba(77,255,195,0.04);border:1px solid rgba(77,255,195,0.15);border-radius:12px;margin-bottom:24px;display:flex;align-items:center;gap:16px;">
+  <div style="width:10px;height:10px;background:#4DFFC3;border-radius:50%;box-shadow:0 0 8px #4DFFC3;flex-shrink:0;"></div>
+  <div>
+    <div style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);">Lobster Trap Security Proxy — Active</div>
+    <div style="font-size:12px;color:var(--muted);margin-top:2px;">All AI report generations are being inspected for prompt injection, PII exposure, and policy violations in real time.</div>
+  </div>
+  <div style="margin-left:auto;font-size:11px;color:var(--muted);white-space:nowrap;">Port 8090</div>
+</div>
+
+<!-- Audit log table -->
+<div class="card">
+  <div class="card-title">
+    Audit Log
+    <span style="font-size:11px;color:var(--muted);font-weight:400;">Powered by Veea Lobster Trap</span>
+  </div>
+
+  {% if logs %}
+  <div class="table-wrap">
+    <div class="table-header" style="grid-template-columns:1fr 1fr 80px 80px 100px 100px;">
+      <span>Request ID</span>
+      <span>Agent</span>
+      <span>Intent</span>
+      <span>Risk</span>
+      <span>Verdict</span>
+      <span>Time</span>
+    </div>
+    {% for log in logs %}
+    <div class="table-row" style="grid-template-columns:1fr 1fr 80px 80px 100px 100px;">
+      <div style="font-size:12px;color:var(--muted);font-family:'DM Mono',monospace;">{{ log.request_id[:16] }}...</div>
+      <div style="font-size:13px;">{{ log.agent_id or '—' }}</div>
+      <div style="font-size:12px;color:var(--muted);">{{ log.intent or '—' }}</div>
+      <div style="font-size:13px;" class="{{ 'risk-high' if log.risk_score > 0.7 else 'risk-med' if log.risk_score > 0.3 else 'risk-low' }}">{{ log.risk_score }}</div>
+      <div><span class="verdict-{{ log.verdict.lower() }}">{{ log.verdict }}</span></div>
+      <div style="font-size:12px;color:var(--muted);">{{ log.timestamp }}</div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty">
+    <div class="empty-icon">🔒</div>
+    <h3>No audit logs yet</h3>
+    <p>Generate a report to see security inspection results here.</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- Policy info -->
+<div class="card" style="margin-top:20px;">
+  <div class="card-title">Active Security Policies</div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:4px 0;">
+    {% for policy in [
+      ('Prompt Injection Detection', 'Blocks attempts to override system instructions or extract sensitive data', 'DENY'),
+      ('PII Exfiltration Guard', 'Prevents exposure of credentials, API keys, and personal information', 'DENY'),
+      ('Intent Mismatch Detection', 'Flags when detected agent behavior differs from declared intent', 'LOG'),
+      ('Rate Limiting', 'Prevents abuse through excessive API calls', 'RATE_LIMIT'),
+      ('Audit Logging', 'All requests logged with full inspection metadata', 'LOG'),
+      ('Risk Scoring', 'Every prompt scored 0.0-1.0 for security risk level', 'ALLOW'),
+    ] %}
+    <div style="padding:16px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;">
+      <div style="font-family:'Syne',sans-serif;font-size:13px;font-weight:700;margin-bottom:6px;color:var(--text);">{{ policy[0] }}</div>
+      <div style="font-size:11px;color:var(--muted);line-height:1.6;margin-bottom:10px;">{{ policy[1] }}</div>
+      <span class="verdict-{{ policy[2].lower() if policy[2] != 'RATE_LIMIT' else 'log' }}">{{ policy[2] }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}

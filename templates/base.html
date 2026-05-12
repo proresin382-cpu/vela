@@ -514,6 +514,9 @@
     <a href="/clients" class="nav-item {% if '/clients' in request.path %}active{% endif %}">
       <span class="icon">👥</span> Clients
     </a>
+    <a href="/security" class="nav-item {% if request.path == '/security' %}active{% endif %}">
+      <span class="icon">🔒</span> Security
+    </a>
     <a href="/pricing" class="nav-item {% if request.path == '/pricing' %}active{% endif %}">
       <span class="icon">💰</span> Pricing
     </a>
@@ -557,6 +560,7 @@
   <span class="mobile-nav-close" onclick="document.getElementById('mobileNav').classList.remove('open')">✕</span>
   <a href="/dashboard" class="nav-item" onclick="document.getElementById('mobileNav').classList.remove('open')">⚡ Dashboard</a>
   <a href="/clients" class="nav-item" onclick="document.getElementById('mobileNav').classList.remove('open')">👥 Clients</a>
+  <a href="/security" class="nav-item" onclick="document.getElementById('mobileNav').classList.remove('open')">🔒 Security</a>
   <a href="/pricing" class="nav-item" onclick="document.getElementById('mobileNav').classList.remove('open')">💰 Pricing</a>
   <a href="/logout" class="nav-item" style="color:var(--danger);margin-top:auto;">↩ Sign out</a>
 </div>

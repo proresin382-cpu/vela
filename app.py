@@ -289,7 +289,10 @@ Important rules:
 
         try:
             from openai import OpenAI
-            ai = OpenAI(api_key=api_key)
+            ai = OpenAI(
+                api_key=api_key,
+                base_url="http://localhost:8090/v1"
+            )
             response = ai.chat.completions.create(
                 model="gpt-4o-mini",
                 messages=[{"role": "user", "content": prompt}],
@@ -302,6 +305,45 @@ Important rules:
     return render_template('report.html', client=client, report=report)
 
 # ── Webhook (for real agent platforms to push logs) ──────────────────────────
+
+@app.route('/security')
+def security():
+    if 'agency_id' not in session:
+        return redirect(url_for('login'))
+    logs = []
+    stats = {'total': 0, 'allowed': 0, 'blocked': 0, 'avg_risk': '0.0'}
+    try:
+        import json as json_lib
+        audit_path = '/root/lobstertrap/audit.log'
+        if os.path.exists(audit_path):
+            with open(audit_path, 'r') as f:
+                lines = f.readlines()[-50:]
+            for line in lines:
+                try:
+                    entry = json_lib.loads(line.strip())
+                    risk = entry.get('risk_score', 0)
+                    verdict = entry.get('action', 'ALLOW')
+                    logs.append({
+                        'request_id': entry.get('request_id', 'unknown'),
+                        'agent_id': entry.get('agent_id', 'vela-report'),
+                        'intent': entry.get('intent_category', 'report_generation'),
+                        'risk_score': round(float(risk), 2),
+                        'verdict': verdict,
+                        'timestamp': entry.get('timestamp', '—')[:16] if entry.get('timestamp') else '—'
+                    })
+                    stats['total'] += 1
+                    if verdict == 'ALLOW':
+                        stats['allowed'] += 1
+                    elif verdict == 'DENY':
+                        stats['blocked'] += 1
+                except:
+                    continue
+            if logs:
+                avg = sum(l['risk_score'] for l in logs) / len(logs)
+                stats['avg_risk'] = round(avg, 2)
+    except Exception as e:
+        pass
+    return render_template('security.html', logs=logs, stats=stats)
 
 @app.route('/pricing')
 def pricing():
