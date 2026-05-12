@@ -17,7 +17,9 @@ db = SQLAlchemy(app)
 # Markdown filter for templates
 @app.template_filter('markdown')
 def markdown_filter(text):
-    return md.markdown(text, extensions=['nl2br'])
+    if not text:
+        return ''
+    return md.markdown(text, extensions=['nl2br', 'sane_lists'])
 
 # ── Models ──────────────────────────────────────────────────────────────────
 
@@ -259,7 +261,7 @@ def generate_report(client_id):
         agents_info = []
         for agent in client.agents:
             agents_info.append(f"Agent: {agent.name} | Type: {agent.agent_type} | Platform: {agent.platform} | Status: {agent.status}")
-        prompt = f"""You are a professional AI agency analyst. Write a client performance report.
+        prompt = f"""You are a professional AI agency analyst. Write a client performance report using proper markdown formatting.
 
 Agency: {session.get('agency_name', 'Vela Agency')}
 Client: {client.name}
@@ -272,35 +274,52 @@ Deployed Agents:
 Activity Logs:
 {chr(10).join(log_summary) if log_summary else 'No activity logged yet'}
 
-Write a professional report with:
-1. Executive Summary
-2. Agent Performance Overview
-3. Key Metrics and Highlights
-4. Issues or Alerts
-5. Recommendations for Next Month
+Write a professional report using these EXACT markdown headings:
 
-Important rules:
+## 1. Executive Summary
+## 2. Agent Performance Overview
+## 3. Key Metrics & Highlights
+## 4. Issues or Alerts
+## 5. Recommendations for Next Month
+
+Rules:
+- Use ## for section headings exactly as shown above
+- Use **bold** for important metrics and numbers
+- Use bullet points for lists
 - Only include activities relevant to {client.business_type}
-- Ignore any activities that do not relate to {client.business_type}
-- Use real numbers from the logs above
-- Do not use any placeholder text
+- Do not use placeholder text
 - Sign off as {session.get('agency_name', 'Vela Agency')} AI Analytics Team
-- Keep it under 400 words total"""
+- Keep it under 500 words"""
 
         try:
             from openai import OpenAI
+            gemini_key = os.getenv('GEMINI_API_KEY', api_key)
             ai = OpenAI(
-                api_key=api_key,
-                base_url="http://localhost:8090/v1"
+                api_key=gemini_key,
+                base_url="https://generativelanguage.googleapis.com/v1beta/openai/"
             )
             response = ai.chat.completions.create(
-                model="gpt-4o-mini",
+                model="gemini-2.5-flash",
                 messages=[{"role": "user", "content": prompt}],
                 max_tokens=1500
             )
             report = response.choices[0].message.content
         except Exception as e:
-            report = f"Error generating report: {str(e)}"
+            # Fallback to OpenAI if Gemini fails
+            try:
+                from openai import OpenAI as OpenAIFallback
+                ai2 = OpenAIFallback(
+                    api_key=os.getenv('OPENAI_API_KEY', api_key),
+                    base_url="http://localhost:8090/v1"
+                )
+                response = ai2.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[{"role": "user", "content": prompt}],
+                    max_tokens=1500
+                )
+                report = response.choices[0].message.content
+            except Exception as e2:
+                report = f"Error generating report: {str(e2)}"
 
     return render_template('report.html', client=client, report=report)
 
